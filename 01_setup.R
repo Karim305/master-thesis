@@ -1,14 +1,10 @@
-## Set-up
+## Set-up script: Loads functions, data, and creates variables common to most scripts
+## The micoaggregation is conducted at the end of this script
 
 # Set up directories ------------------------------------------------------
 
 data_dir <- "XX"
 raw_data_dir <- "XXX"
-
-# fig_dir <- "D:/WealthInequality/Thesis_Karim/_plots/"
-
-
-
 code_dir <- "XXXXXXXXX"
 model_dir <- "XXXXXX"
 
