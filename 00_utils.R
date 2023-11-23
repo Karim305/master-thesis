@@ -1,25 +1,19 @@
-## Functions
+## This script contains most of the functions used throughout my thesis
+## However, a big portion of the function included in this script were not used 
+## in the final code. Additionally, some functions are included in other scripts
 
 ## Load packages
-# library(haven)
-# library(MASS)
-# library(tidyverse)
 library(flexmix)
 library(copula)
-# library(tictoc)
 library(sfsmisc)
-# library(relevance)
-# library(DescTools)
 library(ellipse)
 library(splines)
-
 library(data.table)
 library(dtplyr)
 library(dplyr, warn.conflicts = FALSE)
 library(scales)  
 
 
-# Col <- RColorBrewer::brewer.pal(6, "Set1")
 Color <- c("#0000FF", "#00FF00", "#FF0000", "#F0E716", "#FF00E8", "#ABABAB")
 
 load_data <- function(data = "prepared", 
@@ -27,7 +21,7 @@ load_data <- function(data = "prepared",
   readRDS(paste0(data_dir,data,".rds"))
 }
 
-## asinh(x) function on log10 scale. Authored by Prof. Mächler!
+## asinh(x) function on log10 scale (Provided by Prof. Mächler)
 ihs10 <- function (x) asinh(x/2)/log(10)
 
 inv_ihs10 <- function(y) (exp(2*y*log(10))-1)/exp(y*log(10))
@@ -71,9 +65,7 @@ density_plot <- function(x, rugs = TRUE, bw = "SJ-dpi", smart_labs = TRUE, ...){
   if(smart_labs){
     
     rel_ticks <- c(-10000, 0, 10000, 50000, 100000, 250000, 1000000, 10000000)
-    # rel_labs <- paste0("CHF ", c("0","10K", "50K", "100K", "250K", "1M", "10M"))
     rel_labs <- c("-10k", "0","10k", "50k", "100k", "250k", "1M", "10M")
-    # rel_loc <- log10(rel_ticks)
     rel_loc <- ihs10(rel_ticks)
     plot(y, ..., axes = FALSE, xlab = "CHF")
     axis(1, at = rel_loc, labels = rel_labs)
@@ -127,12 +119,6 @@ plot_marginals <- function(x, y = NULL, mix_model = NULL,
                            title = NULL, bw = "SJ-dpi"){
   
   names <- attributes(x)[[1]]
-  
-  # if(is.null(y)){
-  #   stopifnot(is.data.frame(x))
-  #   y <- x[[2]]
-  #   x <- x[[1]]
-  # }
   
   if(is.null(y)){
     stopifnot(is.data.frame(x)|is.matrix(x))
@@ -250,26 +236,9 @@ smoothScatter_ellipse <- function(x, y = NULL, mix_model = NULL, nrpoints = 0, .
     }
   }
   
-  # on.exit(par(mar = par("mar")))
-  
-  # h1 <- hist(x, breaks=breaks, plot=F)
-  # h2 <- hist(y, breaks=breaks, plot=F)
-  # top <- max(h1$counts, h2$counts)
-  # k <- MASS::kde2d(x, y, n=breaks)
-  # k$z <- k$z^scale_k
-  
-  # par(mar=c(3,3,1,1))
-  # layout(matrix(c(2,0,1,3),2,2,byrow=T),c(3,1), c(1,3))
-  # smoothScatter(x,y,xlab = attributes(x)[[1]], ylab = attributes(y)[[1]])
   smoothScatter(x,y, xlab = "Wealth", ylab = "Income", nrpoints = nrpoints, ...)
-  # image(k, xlab = attributes(x)[[1]], ylab = attributes(y)[[1]]) #plot the image
-  # if no flexmix model is provided, don't try to plot ellipses for mixture components
+  
   if (!is.null(mix_model)) ellipse_mix(mix_model)
-  # par(mar=c(0,2,1,0))
-  # barplot(h1$counts, axes=F, ylim=c(0, top), space=0, col='red')
-  # par(mar=c(2,0,0.5,1))
-  # barplot(h2$counts, axes=F, xlim=c(0, top), space=0, col='red', horiz=T)
-  # 
   
 }
 
@@ -349,11 +318,6 @@ cache_model <- function(model){
 # Plot functions to add components to plots of marginal densities
 plot_marginals_sim <- function(x, y = NULL, mix_model = NULL, xlim = c(0,8), title = NULL, bw = "sj"){
   require(flexmix)
-  # if(is.null(y)){
-  #   stopifnot(is.data.frame(x))
-  #   y <- x[[2]]
-  #   x <- x[[1]]
-  # }
   
   if(is.null(y)){
     stopifnot(is.data.frame(x)|is.matrix(x))
@@ -382,8 +346,6 @@ plot_marginals_sim <- function(x, y = NULL, mix_model = NULL, xlim = c(0,8), tit
     # estimate density
     den_x_sim <- density(x_sim, bw = bw)
     den_y_sim <- density(y_sim, bw = bw)
-    # ymax[1] <- max(lines_mix(mix_model, var = 1, returns = "top"), density(x, bw = bw)$y)
-    # ymax[2] <- max(lines_mix(mix_model, var = 2, returns = "top"), density(y, bw = bw)$y)
     ymax[1] <- max(den_x_sim$y, den_x$y)
     ymax[2] <- max(den_y_sim$y, den_y$y)
   } else {
@@ -405,7 +367,7 @@ plot_marginals_sim <- function(x, y = NULL, mix_model = NULL, xlim = c(0,8), tit
 
 
 
-## Adapttion of FLXMCmvcombi driver: with non-diagonal covariance matrix:
+## Adaptation of FLXMCmvcombi driver: with non-diagonal covariance matrix:
 setClass("FLXMCmvcombi2",
          representation(binary = "vector"),
          contains = "FLXMC")
@@ -474,9 +436,6 @@ setMethod("FLXmstep", signature(model = "FLXMCmvcombi2"),
             return(sapply(seq_len(ncol(weights)),
                           function(k) model@fit(model@x, model@y, weights[,k], model@binary)))
           })
-
-
-
 
 
 # Residual plots for mlm --------------------------------------------------
@@ -1296,21 +1255,7 @@ find_single_level_factors <- function(data) {
     names()
 }
 
-# # Apply the function to each nested tibble
-# result <- df_train2 %>%
-#   mutate(single_level_factors = map(train, find_single_level_factors))
-# result$single_level_factors
-# 
-# result <- df_test2 %>%
-#   mutate(single_level_factors = map(test, find_single_level_factors))
-# 
-# with(data, table(shr_w_lifeins_rng))
-# with(data, table(shr_w_realest_rng))
-# test <- df_train2$train[[2]]
-# 
-# lm_test <- lm(f32,test)
-# f32
-# test
+
 
 fit_by_group <- function(data = df_stage2, train2, model, grouped = TRUE) {
   # create nested datasets
@@ -1365,24 +1310,7 @@ fit_by_group <- function(data = df_stage2, train2, model, grouped = TRUE) {
                         
     ))       
   
-  # fun <- function(test, predicted){
-  #   test <- test %>% tibble() %>% select(c("w","y"))
-  #   dropped_rows <- predicted$dropped_rows
-  #   test <- test[-dropped_rows,]
-  #   target <- tibble(predicted$target) %>% select(c("w","y"))
-  #   all_equal(test, target)
-  # }
-  # 
-  # map2(df_reg$test, df_reg$predicted, fun)
-  
-  # target = purrr::map(test, ~select(., c(w,y)))) 
-  
-  # df_reg <- df_reg %>% 
-  #   mutate(predicted = purrr::map2(fit, test, ~data.frame(predict(.x,.y)) %>% 
-  #                                    set_names(c("w","y"))),
-  #          
-  #          target = purrr::map(test, ~select(., c(w,y)))) 
-  
+ 
   
   df_reg %>% 
     # select(!!rlang::sym(by), fit, predicted)
@@ -1412,8 +1340,6 @@ combined_R2 <- function(fit_df){
 
 
 plot_diagnostics_grouped <- function(fit_df, main = ""){
-  
-  # deparse(substitute((fit_df$fit[[1]]$call)))
   
   
   
@@ -1574,8 +1500,7 @@ plot_diagnostics <- function(target, predictions, main = "Diagnostics Plots ",
   WxY <- w_sign:y_sign
   
   o <- sort_desc2(WxY)
-  # Col <- c("#0000FF", "#00FF00", "#FF0000", "#F0E716", "#FF00E8", "#ABABAB")
-  # Col <- RColorBrewer::brewer.pal(6, "Set1")
+          
   pal <- scales::alpha(Col,0.5)
   
   cols <- pal[seq_along(levels(WxY))[WxY]]
