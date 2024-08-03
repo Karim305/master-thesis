@@ -5,7 +5,7 @@ This repository contains the code for the analysis in my master's thesis, titled
 
 
 ## Repository Structure
-### Scripts that are sourced by other scripts in order load functions, data, and common variables
+### Scripts that are sourced by other scripts in order to load functions, data, and common variables
 - `00_utils.R`: Functions used across the project.
 - `01_setup.R`: Setup script that loads data and creates common variables.
 
